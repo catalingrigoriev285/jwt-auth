@@ -1,16 +1,22 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import ENDPOINTS from "@/utils/api_endpoint.util";
+import { useAuth } from "@/context/AuthContext";
 
 const SignIn = () => {
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
     const [error, setError] = React.useState("");
+    const [isLoading, setIsLoading] = React.useState(false);
+    const router = useRouter();
+    const { refetchUser } = useAuth();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+        setIsLoading(true);
 
         try {
             const response = await fetch(ENDPOINTS.USER_LOGIN, {
@@ -20,16 +26,19 @@ const SignIn = () => {
                 body: JSON.stringify({ email, password }),
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || "Failed to sign in");
+                throw new Error(data.message || "Failed to sign in");
             }
 
-            const data = await response.json();
-            localStorage.setItem("token", data.token);
-            window.location.href = "/dashboard";
+            // Refetch user data to update context
+            await refetchUser();
+            router.push("/dashboard");
         } catch (err) {
             setError(err instanceof Error ? err.message : "An error occurred");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -90,9 +99,10 @@ const SignIn = () => {
                     <div>
                         <button
                             type="submit"
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            disabled={isLoading}
+                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Sign in
+                            {isLoading ? "Signing in..." : "Sign in"}
                         </button>
                     </div>
                 </form>

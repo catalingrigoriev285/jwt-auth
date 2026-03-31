@@ -1,16 +1,29 @@
 "use client";
 
-import React, { useState } from "react";
-
+import React from "react";
 import { useAuth } from "@/context/AuthContext";
 
 const Dashboard = () => {
-    const { user, setUser } = useAuth();
+    const { user, logout, loading } = useAuth();
 
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        setUser(null);
-        window.location.href = "/";
+    if (loading) {
+        return (
+            <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-gray-600">Loading...</div>
+            </main>
+        );
+    }
+
+    if (!user) {
+        return (
+            <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-gray-600">Please log in</div>
+            </main>
+        );
+    }
+
+    const handleLogout = async () => {
+        await logout();
     };
 
     return (
@@ -28,9 +41,14 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-4">
                     <p className="text-sm text-gray-500">Role</p>
-                    <p className="font-medium">{user?.role}</p>
+                    <p className="font-medium capitalize">{user?.role}</p>
+                </div>
+
+                <div className="mb-6">
+                    <p className="text-sm text-gray-500">User ID</p>
+                    <p className="font-mono text-xs">{user?.id}</p>
                 </div>
 
                 <button
