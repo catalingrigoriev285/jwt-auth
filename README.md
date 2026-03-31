@@ -1,5 +1,7 @@
 # Full-Stack Authentication Application
 
+![thumbnail](assets/thumbnail.png)
+
 A modern full-stack web application with JWT-based authentication, built with Next.js and Express.
 
 ## Tech Stack
